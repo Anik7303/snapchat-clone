@@ -1,20 +1,18 @@
 package com.anikmohammad.snapchatclone;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -22,8 +20,11 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -39,6 +40,7 @@ public class CreateSnapActivity extends AppCompatActivity {
     private Button sendButton;
 
     private int imageRequestCode;
+    private StorageReference storageReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,21 +103,42 @@ public class CreateSnapActivity extends AppCompatActivity {
         bitmapImage.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
         byte[] array = outputStream.toByteArray();
 
-        UploadTask uploadTask = FirebaseStorage.getInstance()
-                .getReference().child("images")
-//                .child(UUID.randomUUID().toString()+".jpeg")
-                .putBytes(outputStream.toByteArray());
-        uploadTask.addOnFailureListener(new OnFailureListener() {
+        storageReference = FirebaseStorage.getInstance()
+                .getReference()
+                .child("images")
+                .child(UUID.randomUUID()+".jpeg");
+        UploadTask uploadTask = storageReference.putBytes(array);
+
+        Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
             @Override
-            public void onFailure(@NonNull Exception e) {
-                Toast.makeText(CreateSnapActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                if (!task.isSuccessful()) {
+                    throw task.getException();
+                }
+                return storageReference.getDownloadUrl();
             }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
             @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Log.i("Image URL", taskSnapshot.getUploadSessionUri().toString());
+            public void onComplete(@NonNull Task<Uri> task) {
+                Uri uri =  task.getResult();
+                Log.i("Download url", uri.toString());
             }
         });
+
+//        uploadTask.addOnFailureListener(new OnFailureListener() {
+//            @Override
+//            public void onFailure(@NonNull Exception e) {
+//                Toast.makeText(CreateSnapActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+//            }
+//        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+//            @Override
+//            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+//                Log.i("Image URL", taskSnapshot.getUploadSessionUri().toString());
+//                Log.i("Image URL storage", taskSnapshot.getStorage().getDownloadUrl().toString());
+//                Log.i("Image URL task", taskSnapshot.getTask().getResult().toString());
+//                Log.i("Image URL reference", storageReference.getDownloadUrl().toString());
+//            }
+//        });
     }
 
     private void handleException(Exception e, String title) {
