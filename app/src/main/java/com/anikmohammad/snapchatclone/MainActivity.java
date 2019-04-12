@@ -15,6 +15,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -61,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     protected void actionFunction(View view) {
-        String email = emailEditText.getText().toString();
+        final String email = emailEditText.getText().toString();
         String password = passwordEditText.getText().toString();
 
         if(email.isEmpty() || password.isEmpty()) {
@@ -69,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return;
         }
         if(loginState) {
+            Log.i("Action", "login");
             mAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
                         @Override
@@ -76,19 +78,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             if(task.isSuccessful()) {
                                 redirectToSnaps();
                             }else {
-                                Toast.makeText(MainActivity.this, task.getException().toString(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(MainActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
         }else {
+            Log.i("Action", "sign up");
             mAuth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if(task.isSuccessful()) {
+                                // add to database
+                                FirebaseDatabase.getInstance().getReference().child("users").child(task.getResult().getUser().getUid()).child("email").setValue(email);
+                                // redirect to snaps activity
                                 redirectToSnaps();
                             }else {
-                                Toast.makeText(MainActivity.this, task.getException().toString(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(MainActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
@@ -97,11 +103,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     protected void alternateState() {
         if(loginState) {
-            setLoginState();
-        }else {
             setSignupState();
+        }else {
+            setLoginState();
         }
-        loginState = !loginState;
     }
 
     private void setLoginState() {
