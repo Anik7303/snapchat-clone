@@ -38,6 +38,7 @@ public class CreateSnapActivity extends AppCompatActivity {
     private Button sendButton;
 
     private int imageRequestCode;
+    private String imageName;
     private StorageReference storageReference;
 
     @Override
@@ -55,6 +56,8 @@ public class CreateSnapActivity extends AppCompatActivity {
         uploadButton = findViewById(R.id.uploadButton);
         sendButton = findViewById(R.id.sendButton);
         imageRequestCode = 1;
+        storageReference = FirebaseStorage.getInstance().getReference();
+        imageName = String.format("%s.jpeg", UUID.randomUUID().toString());
     }
 
     protected void uploadImage(View view) {
@@ -100,11 +103,15 @@ public class CreateSnapActivity extends AppCompatActivity {
             bitmapImage.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
             byte[] array = outputStream.toByteArray();
 
-            storageReference = FirebaseStorage.getInstance()
-                    .getReference()
+//            storageReference = FirebaseStorage.getInstance()
+//                    .getReference()
+//                    .child("images")
+//                    .child(imageName);
+
+            UploadTask uploadTask = storageReference
                     .child("images")
-                    .child(UUID.randomUUID() + ".jpeg");
-            UploadTask uploadTask = storageReference.putBytes(array);
+                    .child(imageName)
+                    .putBytes(array);
 
             Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                 @Override
@@ -122,6 +129,7 @@ public class CreateSnapActivity extends AppCompatActivity {
                         Log.i("Download url", uri.toString());
                         Intent intent = new Intent(CreateSnapActivity.this, ChooseUsersActivity.class);
                         intent.putExtra("imageUrl", uri.toString());
+                        intent.putExtra("imageName", imageName);
                         intent.putExtra("message", messageEditText.getText().toString());
                         startActivity(intent);
                     } catch (Exception e) {
