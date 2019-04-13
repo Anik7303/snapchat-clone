@@ -22,8 +22,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -122,6 +120,9 @@ public class CreateSnapActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<Uri> task) {
                 Uri uri =  task.getResult();
                 Log.i("Download url", uri.toString());
+                Intent intent = new Intent(CreateSnapActivity.this, ChooseUsersActivity.class);
+                intent.putExtra("imageUrl", uri);
+                startActivity(intent);
             }
         });
 
