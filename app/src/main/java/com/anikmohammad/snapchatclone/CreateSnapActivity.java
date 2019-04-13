@@ -92,54 +92,46 @@ public class CreateSnapActivity extends AppCompatActivity {
     }
 
     protected void sendSnap(View view) {
-        String message = messageEditText.getText().toString();
+        try {
+            snapImageView.setDrawingCacheEnabled(true);
+            snapImageView.buildDrawingCache();
+            Bitmap bitmapImage = ((BitmapDrawable) snapImageView.getDrawable()).getBitmap();
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            bitmapImage.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+            byte[] array = outputStream.toByteArray();
 
-        snapImageView.setDrawingCacheEnabled(true);
-        snapImageView.buildDrawingCache();
-        Bitmap bitmapImage = ((BitmapDrawable) snapImageView.getDrawable()).getBitmap();
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        bitmapImage.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-        byte[] array = outputStream.toByteArray();
+            storageReference = FirebaseStorage.getInstance()
+                    .getReference()
+                    .child("images")
+                    .child(UUID.randomUUID() + ".jpeg");
+            UploadTask uploadTask = storageReference.putBytes(array);
 
-        storageReference = FirebaseStorage.getInstance()
-                .getReference()
-                .child("images")
-                .child(UUID.randomUUID()+".jpeg");
-        UploadTask uploadTask = storageReference.putBytes(array);
-
-        Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-            @Override
-            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                if (!task.isSuccessful()) {
-                    throw task.getException();
+            Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                @Override
+                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                    if (!task.isSuccessful()) {
+                        throw task.getException();
+                    }
+                    return storageReference.getDownloadUrl();
                 }
-                return storageReference.getDownloadUrl();
-            }
-        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-            @Override
-            public void onComplete(@NonNull Task<Uri> task) {
-                Uri uri =  task.getResult();
-                Log.i("Download url", uri.toString());
-                Intent intent = new Intent(CreateSnapActivity.this, ChooseUsersActivity.class);
-                intent.putExtra("imageUrl", uri);
-                startActivity(intent);
-            }
-        });
-
-//        uploadTask.addOnFailureListener(new OnFailureListener() {
-//            @Override
-//            public void onFailure(@NonNull Exception e) {
-//                Toast.makeText(CreateSnapActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-//            }
-//        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-//            @Override
-//            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-//                Log.i("Image URL", taskSnapshot.getUploadSessionUri().toString());
-//                Log.i("Image URL storage", taskSnapshot.getStorage().getDownloadUrl().toString());
-//                Log.i("Image URL task", taskSnapshot.getTask().getResult().toString());
-//                Log.i("Image URL reference", storageReference.getDownloadUrl().toString());
-//            }
-//        });
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                @Override
+                public void onComplete(@NonNull Task<Uri> task) {
+                    try {
+                        Uri uri = task.getResult();
+                        Log.i("Download url", uri.toString());
+                        Intent intent = new Intent(CreateSnapActivity.this, ChooseUsersActivity.class);
+                        intent.putExtra("imageUrl", uri.toString());
+                        intent.putExtra("message", messageEditText.getText().toString());
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        handleException(e, "Upload Image");
+                    }
+                }
+            });
+        }catch(Exception e) {
+            handleException(e, "sendSnap");
+        }
     }
 
     private void handleException(Exception e, String title) {
