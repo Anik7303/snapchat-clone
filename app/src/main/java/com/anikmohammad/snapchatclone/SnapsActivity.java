@@ -11,13 +11,27 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.StorageReference;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class SnapsActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
+    private ListView snapsListView;
+    private ArrayList<HashMap<String, String>> snapsList;
+    private SimpleAdapter adapter;
+
+    private StorageReference storageReference;
+    private DatabaseReference databaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +44,12 @@ public class SnapsActivity extends AppCompatActivity {
 
     private void setupVariables() {
         mAuth = FirebaseAuth.getInstance();
+        snapsListView = findViewById(R.id.snapsListView);
+        snapsList = new ArrayList<>();
+        adapter = new SimpleAdapter(SnapsActivity.this, snapsList, android.R.layout.simple_list_item_2, new String[]{"", ""}, new int[] {, });
+        snapsListView.setAdapter(adapter);
+
+        populateListView();
     }
 
     @Override
@@ -55,6 +75,10 @@ public class SnapsActivity extends AppCompatActivity {
                 return false;
         }
         return true;
+    }
+
+    private void populateListView() {
+        databaseReference = FirebaseDatabase.getInstance().getReference().child("users");
     }
 
     private void redirectToCreateSnap() {
