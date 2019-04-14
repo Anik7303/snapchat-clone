@@ -1,13 +1,10 @@
 package com.anikmohammad.snapchatclone;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.net.Uri;
-import android.provider.MediaStore;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,11 +31,7 @@ public class SnapsActivity extends AppCompatActivity implements AdapterView.OnIt
     private FirebaseAuth mAuth;
     private ListView snapsListView;
     private ArrayList<HashMap<String, String>> snapsList;
-    private ArrayList<String> snapImageUrls;
     private SimpleAdapter adapter;
-
-    private StorageReference storageReference;
-    private DatabaseReference databaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +79,6 @@ public class SnapsActivity extends AppCompatActivity implements AdapterView.OnIt
 
     private void populateListView() {
         snapsList.clear();
-//        snapImageUrls.clear();
         Log.i("List view population", "running");
         FirebaseDatabase.getInstance().getReference()
                 .child("users")

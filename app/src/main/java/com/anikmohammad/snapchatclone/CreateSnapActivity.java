@@ -103,15 +103,12 @@ public class CreateSnapActivity extends AppCompatActivity {
             bitmapImage.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
             byte[] array = outputStream.toByteArray();
 
-//            storageReference = FirebaseStorage.getInstance()
-//                    .getReference()
-//                    .child("images")
-//                    .child(imageName);
-
-            UploadTask uploadTask = storageReference
+            storageReference = FirebaseStorage.getInstance()
+                    .getReference()
                     .child("images")
-                    .child(imageName)
-                    .putBytes(array);
+                    .child(imageName);
+
+            UploadTask uploadTask = storageReference.putBytes(array);
 
             Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                 @Override
