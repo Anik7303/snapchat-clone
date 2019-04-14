@@ -69,6 +69,9 @@ public class SnapsActivity extends AppCompatActivity implements AdapterView.OnIt
                 mAuth.signOut();
                 finish();
                 break;
+            case R.id.reload:
+                reload();
+                break;
             default:
                 return false;
         }
