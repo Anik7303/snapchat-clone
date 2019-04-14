@@ -13,6 +13,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".SnapViewActivity"></activity>
         <activity android:name=".ChooseUsersActivity" />
         <activity android:name=".CreateSnapActivity" />
         <activity android:name=".SnapsActivity" />
