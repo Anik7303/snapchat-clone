@@ -55,7 +55,7 @@ public class SnapsActivity extends AppCompatActivity implements AdapterView.OnIt
         snapsList = new ArrayList<>();
         adapter = new SimpleAdapter(SnapsActivity.this, snapsList, android.R.layout.simple_list_item_2, new String[]{"message", "senderEmail"}, new int[] {android.R.id.text1, android.R.id.text2});
         snapsListView.setAdapter(adapter);
-
+        snapsListView.setOnItemClickListener(SnapsActivity.this);
         populateListView();
     }
 
@@ -154,6 +154,7 @@ public class SnapsActivity extends AppCompatActivity implements AdapterView.OnIt
             intent.putExtra("senderUid", temp.get("senderId"));
             intent.putExtra("senderEmail", temp.get("senderEmail"));
             intent.putExtra("imageUrl", temp.get("imageUrl"));
+            intent.putExtra("message", temp.get("message"));
             startActivity(intent);
         }
     }
