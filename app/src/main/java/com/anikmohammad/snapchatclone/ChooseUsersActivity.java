@@ -34,6 +34,7 @@ public class ChooseUsersActivity extends AppCompatActivity implements AdapterVie
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_users);
+        setTitle("Send To");
 
         setupVariables();
 

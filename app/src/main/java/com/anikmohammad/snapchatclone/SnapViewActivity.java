@@ -20,7 +20,6 @@ public class SnapViewActivity extends AppCompatActivity {
 
     private ImageView imageView;
     private TextView textView;
-    private Intent intent;
     private String imageUrl;
     private String message;
 
@@ -28,7 +27,7 @@ public class SnapViewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_snap_view);
-        setTitle("");
+        setTitle(String.format("From: %s", getIntent().getStringExtra("senderEmail")));
 
         setupVariables();
     }
@@ -36,9 +35,8 @@ public class SnapViewActivity extends AppCompatActivity {
     private void setupVariables() {
         imageView = findViewById(R.id.showSnapImageView);
         textView = findViewById(R.id.messageTextView);
-        intent = SnapViewActivity.this.getIntent();
-        imageUrl = intent.getStringExtra("imageUrl");
-        message = intent.getStringExtra("message");
+        imageUrl = getIntent().getStringExtra("imageUrl");
+        message = getIntent().getStringExtra("message");
         Log.i("ImageUrl", imageUrl);
         Log.i("message", message);
         try {
