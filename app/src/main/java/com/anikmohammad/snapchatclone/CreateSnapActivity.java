@@ -99,6 +99,7 @@ public class CreateSnapActivity extends AppCompatActivity {
 
     protected void sendSnap(View view) {
         try {
+            sendButton.setEnabled(false);
             snapImageView.setDrawingCacheEnabled(true);
             snapImageView.buildDrawingCache();
             Bitmap bitmapImage = ((BitmapDrawable) snapImageView.getDrawable()).getBitmap();
@@ -135,11 +136,13 @@ public class CreateSnapActivity extends AppCompatActivity {
                         startActivity(intent);
                     } catch (Exception e) {
                         handleException(e, "Upload Image");
+                        sendButton.setEnabled(true);
                     }
                 }
             });
         }catch(Exception e) {
             handleException(e, "sendSnap");
+            sendButton.setEnabled(true);
         }
     }
 
@@ -177,6 +180,7 @@ public class CreateSnapActivity extends AppCompatActivity {
         if(sendButtonClicked) {
             deleteImage();
             sendButtonClicked = false;
+            sendButton.setEnabled(true);
         }
     }
 

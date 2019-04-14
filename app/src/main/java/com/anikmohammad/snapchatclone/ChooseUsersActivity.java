@@ -65,6 +65,9 @@ public class ChooseUsersActivity extends AppCompatActivity implements AdapterVie
     }
 
     private void populateUsersList() {
+        userEmails.clear();
+        userUIDs.clear();
+        Log.i("ChooseUsers", "populateUsersList");
         FirebaseDatabase.getInstance().getReference().child("users").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
@@ -72,6 +75,7 @@ public class ChooseUsersActivity extends AppCompatActivity implements AdapterVie
                 Log.i("Values", String.format("email: %s", email));
                 userEmails.add(email);
                 userUIDs.add(dataSnapshot.getKey());
+                adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -86,7 +90,6 @@ public class ChooseUsersActivity extends AppCompatActivity implements AdapterVie
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {}
         });
-        adapter.notifyDataSetChanged();
     }
 
     private void handleException(Exception e, String title) {
