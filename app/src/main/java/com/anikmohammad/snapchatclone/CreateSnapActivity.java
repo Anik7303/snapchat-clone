@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -38,6 +39,7 @@ public class CreateSnapActivity extends AppCompatActivity {
     private Button sendButton;
 
     private int imageRequestCode;
+    private boolean sendButtonClicked;
     private String imageName;
     private StorageReference storageReference;
 
@@ -51,6 +53,7 @@ public class CreateSnapActivity extends AppCompatActivity {
     }
 
     private void setupVariables() {
+        sendButtonClicked = false;
         snapImageView = findViewById(R.id.snapImageView);
         messageEditText = findViewById(R.id.messageEditText);
         uploadButton = findViewById(R.id.uploadButton);
@@ -122,6 +125,7 @@ public class CreateSnapActivity extends AppCompatActivity {
                 @Override
                 public void onComplete(@NonNull Task<Uri> task) {
                     try {
+                        sendButtonClicked = true;
                         Uri uri = task.getResult();
                         Log.i("Download url", uri.toString());
                         Intent intent = new Intent(CreateSnapActivity.this, ChooseUsersActivity.class);
@@ -139,6 +143,18 @@ public class CreateSnapActivity extends AppCompatActivity {
         }
     }
 
+    private void deleteImage() {
+        FirebaseStorage.getInstance().getReference().child("images")
+                .child(imageName)
+                .delete()
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        handleException(e, "deleteImage");
+                    }
+                });
+    }
+
     private void handleException(Exception e, String title) {
         Toast.makeText(CreateSnapActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
         Log.i(String.format("Error - %s", title), e.getMessage());
@@ -151,8 +167,17 @@ public class CreateSnapActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
+        if(sendButtonClicked) {
+            deleteImage();
+            sendButtonClicked = false;
+        }
     }
 
     @Override

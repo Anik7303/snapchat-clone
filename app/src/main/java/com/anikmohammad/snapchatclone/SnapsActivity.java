@@ -19,9 +19,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +30,7 @@ public class SnapsActivity extends AppCompatActivity implements AdapterView.OnIt
     private ListView snapsListView;
     private ArrayList<HashMap<String, String>> snapsList;
     private SimpleAdapter adapter;
+    private boolean snapViewed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +42,7 @@ public class SnapsActivity extends AppCompatActivity implements AdapterView.OnIt
     }
 
     private void setupVariables() {
+        snapViewed = false;
         mAuth = FirebaseAuth.getInstance();
         snapsListView = findViewById(R.id.snapsListView);
         snapsList = new ArrayList<>();
@@ -99,6 +99,7 @@ public class SnapsActivity extends AppCompatActivity implements AdapterView.OnIt
                                             HashMap<String, String> temp = new HashMap<>();
                                             temp.put("senderEmail", dataSnapshot.child("senderEmail").getValue().toString());
                                             temp.put("message", dataSnapshot.child("message").getValue().toString());
+                                            temp.put("imageName", dataSnapshot.child("imageName").getValue().toString());
                                             temp.put("imageUrl", dataSnapshot.child("imageUrl").getValue().toString());
                                             temp.put("snapId", dataSnapshot.getKey());
                                             snapsList.add(temp);
@@ -136,19 +137,26 @@ public class SnapsActivity extends AppCompatActivity implements AdapterView.OnIt
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {}
                 });
+        adapter.notifyDataSetChanged();
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if(parent.getId() == R.id.snapsListView) {
+            snapViewed = true;
             Intent intent = new Intent(SnapsActivity.this, SnapViewActivity.class);
             HashMap<String, String> temp = snapsList.get(position);
-            intent.putExtra("senderUid", temp.get("senderId"));
             intent.putExtra("senderEmail", temp.get("senderEmail"));
+            intent.putExtra("imageName", temp.get("imageName"));
             intent.putExtra("imageUrl", temp.get("imageUrl"));
             intent.putExtra("message", temp.get("message"));
+            intent.putExtra("snapId", temp.get("snapId"));
             startActivity(intent);
         }
+    }
+
+    private void reload() {
+        populateListView();
     }
 
     private void redirectToCreateSnap() {
@@ -168,8 +176,17 @@ public class SnapsActivity extends AppCompatActivity implements AdapterView.OnIt
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
+        if(snapViewed) {
+            populateListView();
+            snapViewed = false;
+        }
     }
 
     @Override

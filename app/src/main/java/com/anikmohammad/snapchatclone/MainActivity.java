@@ -65,6 +65,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         final String email = emailEditText.getText().toString();
         String password = passwordEditText.getText().toString();
 
+        actionButton.setEnabled(false);
+
         if(email.isEmpty() || password.isEmpty()) {
             Toast.makeText(MainActivity.this, "Please fill email address and password correctly", Toast.LENGTH_SHORT).show();
             return;
@@ -141,6 +143,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
+        actionButton.setEnabled(true);
     }
 
     @Override

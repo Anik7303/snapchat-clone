@@ -56,9 +56,9 @@ public class ChooseUsersActivity extends AppCompatActivity implements AdapterVie
         if(parent.getId() == R.id.usersListView) {
             HashMap<String, String> hashMap = new HashMap<>();
             hashMap.put("senderEmail", mAuth.getCurrentUser().getEmail());
-            hashMap.put("senderUID", mAuth.getCurrentUser().getUid());
-            hashMap.put("message", getIntent().getStringExtra("message"));
+            hashMap.put("imageName", getIntent().getStringExtra("imageName"));
             hashMap.put("imageUrl", getIntent().getStringExtra("imageUrl"));
+            hashMap.put("message", getIntent().getStringExtra("message"));
             FirebaseDatabase.getInstance().getReference().child("users").child(userUIDs.get(position)).child("snaps").push().setValue(hashMap);
             startActivity(new Intent(ChooseUsersActivity.this, SnapsActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
         }
@@ -72,7 +72,6 @@ public class ChooseUsersActivity extends AppCompatActivity implements AdapterVie
                 Log.i("Values", String.format("email: %s", email));
                 userEmails.add(email);
                 userUIDs.add(dataSnapshot.getKey());
-                adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -87,9 +86,16 @@ public class ChooseUsersActivity extends AppCompatActivity implements AdapterVie
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {}
         });
+        adapter.notifyDataSetChanged();
     }
 
     private void handleException(Exception e, String title) {
         Log.i(String.format("Error - %s", title), e.getMessage());
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
     }
 }
